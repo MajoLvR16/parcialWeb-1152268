@@ -1,4 +1,4 @@
-let currentOrder = null;
+let cart = { products: [] };
 let products = {};
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,29 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
     finishOrderButton.addEventListener('click', finishOrder);
     continueShoppingButton.addEventListener('click', () => window.location.href = 'main.html');
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('id');
-    if (orderId) {
-        fetchOrderDetails(orderId);
-    } else {
-        alert('No se especificó un ID de pedido');
-        window.location.href = 'cart.html';
-    }
+    fetchCartDetails();
 });
 
-async function fetchOrderDetails(orderId) {
-    try {
-        const response = await fetch(`https://fakestoreapi.com/carts/${orderId}`);
-        currentOrder = await response.json();
-        await fetchProductDetails(currentOrder.products);
-        displayOrderDetails();
-    } catch (error) {
-        console.error('Error fetching order details:', error);
-    }
+async function fetchCartDetails() {
+    cart = JSON.parse(localStorage.getItem('cart')) || { products: [] };
+    await fetchProductDetails(cart.products);
+    displayOrderDetails();
 }
 
-async function fetchProductDetails(orderProducts) {
-    const productPromises = orderProducts.map(item => 
+async function fetchProductDetails(cartProducts) {
+    const productPromises = cartProducts.map(item => 
         fetch(`https://fakestoreapi.com/products/${item.productId}`)
             .then(res => res.json())
     );
@@ -58,7 +46,7 @@ function displayOrderDetails() {
     orderItems.innerHTML = '';
     let total = 0;
 
-    currentOrder.products.forEach(item => {
+    cart.products.forEach(item => {
         const product = products[item.productId];
         const subtotal = product.price * item.quantity;
         total += subtotal;
@@ -66,7 +54,7 @@ function displayOrderDetails() {
         const itemElement = document.createElement('div');
         itemElement.className = 'mb-3 d-flex align-items-center';
         itemElement.innerHTML = `
-            <img src="${product.image}" alt="${product.title}" class="me-3" style="width: 50px; height: 50px; object-fit: contain;">
+            <img src="${product.image}" alt="${product.title}" class="product-image me-3">
             <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center">
                     <span>${product.title}</span>
@@ -82,62 +70,56 @@ function displayOrderDetails() {
         orderItems.appendChild(itemElement);
     });
 
-    updateTotal(total);
+    updateTotalDisplay(total);
+}
+
+function updateTotalDisplay(total) {
+    const totalElement = document.getElementById('orderTotal');
+    if (totalElement) {
+        totalElement.innerHTML = `<strong>Total del pedido:</strong> $${total.toFixed(2)}`;
+    } else {
+        console.error('Elemento con ID "orderTotal" no encontrado');
+    }
+    console.log('Total actualizado:', total); // Para debugging
 }
 
 function updateQuantity(productId, newQuantity) {
-    const item = currentOrder.products.find(item => item.productId === productId);
-    if (item) {
-        item.quantity = parseInt(newQuantity);
-        const product = products[productId];
-        const subtotal = product.price * item.quantity;
-        
-        // Actualizar solo el subtotal del producto específico
-        const productElement = document.querySelector(`input[onchange="updateQuantity(${productId}, this.value)"]`).closest('.mb-3');
-        const subtotalElement = productElement.querySelector('span:last-child');
-        subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-
-        // Recalcular y actualizar el total
-        const total = currentOrder.products.reduce((sum, item) => sum + (products[item.productId].price * item.quantity), 0);
-        updateTotal(total);
+    const productInCart = cart.products.find(p => p.productId === productId);
+    if (productInCart) {
+        productInCart.quantity = parseInt(newQuantity);
+        updateCartInLocalStorage();
+        recalculateTotal();
     }
 }
 
-function updateTotal(total) {
-    const orderTotal = document.getElementById('orderTotal');
-    orderTotal.textContent = `Total: $${total.toFixed(2)}`;
+function recalculateTotal() {
+    let total = 0;
+    cart.products.forEach(item => {
+        const product = products[item.productId];
+        total += product.price * item.quantity;
+    });
+    updateTotalDisplay(total);
 }
 
-async function updateOrder() {
-    try {
-        const response = await fetch(`https://fakestoreapi.com/carts/${currentOrder.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(currentOrder),
-        });
+function updateCartInLocalStorage() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
 
-        if (response.ok) {
-            alert('Pedido actualizado correctamente');
-        } else {
-            throw new Error('Error al actualizar el pedido');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Ocurrió un error al actualizar el pedido');
-    }
+function updateOrder() {
+    alert('El pedido ha sido actualizado.');
+    recalculateTotal();
 }
 
 function finishOrder() {
-    // Aquí iría la lógica para finalizar el pedido
-    alert('Pedido finalizado. Gracias por su compra!');
-    // Después de finalizar, podríamos redirigir al usuario a la página principal o a una página de confirmación
-    window.location.href = 'main.html';
+    alert('Pedido finalizado. Gracias por tu compra.');
+    cart = { products: [] };
+    updateCartInLocalStorage();
+    displayOrderDetails();
 }
 
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    localStorage.removeItem('cart');
     window.location.href = 'index.html';
 }

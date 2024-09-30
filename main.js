@@ -1,5 +1,6 @@
 let products = [];
 let categories = [];
+let cart = { products: [] };
 
 document.addEventListener('DOMContentLoaded', () => {
     const cartButton = document.getElementById('cartButton');
@@ -17,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cartButton.addEventListener('click', () => window.location.href = 'cart.html');
     logoutButton.addEventListener('click', logout);
     sortSelect.addEventListener('change', sortProducts);
+
+    // Recuperar el carrito del localStorage
+    cart = JSON.parse(localStorage.getItem('cart')) || { products: [] };
 });
 
 async function fetchProducts() {
@@ -108,42 +112,34 @@ function sortProducts() {
     displayProducts(sortedProducts);
 }
 
-async function addToCart(productId) {
+function addToCart(productId) {
+    // Recuperar el carrito actual del localStorage
+    cart = JSON.parse(localStorage.getItem('cart')) || { products: [] };
+
     const product = products.find(p => p.id === productId);
     if (product) {
-        try {
-            const userId = localStorage.getItem('userId');
-            const response = await fetch('https://fakestoreapi.com/carts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    date: new Date(),
-                    products: [{productId: product.id, quantity: 1}]
-                })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Nuevo carrito creado:', result);
-                alert('Producto añadido a un nuevo carrito');
-                
-                // Notificar que se ha creado un nuevo carrito
-                localStorage.setItem('cartUpdated', Date.now().toString());
-            } else {
-                throw new Error('Error al crear el carrito');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Ocurrió un error al añadir el producto al carrito');
+        const existingProduct = cart.products.find(p => p.productId === productId);
+        if (existingProduct) {
+            // Si el producto ya está en el carrito, incrementar cantidad
+            existingProduct.quantity += 1;
+        } else {
+            // Si no está en el carrito, añadirlo con cantidad 1
+            cart.products.push({ productId: productId, quantity: 1 });
         }
+
+        // Guardar el carrito actualizado en el localStorage
+        updateCartInLocalStorage();
+        alert('Producto añadido al carrito');
     }
+}
+
+function updateCartInLocalStorage() {
+    localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    localStorage.removeItem('cart');
     window.location.href = 'index.html';
 }
