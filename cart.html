@@ -4,29 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de compras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="header">
+    <header class="bg-dark text-white py-3">
         <div class="container">
-            <h1>Carrito de compras</h1>
-            <nav>
-                <button id="backToMainButton">Volver a la tienda</button>
-                <button id="logoutButton">Salir</button>
-            </nav>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">Carrito de compras</h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button id="backToMainButton" class="btn btn-outline-light me-2">Volver a la tienda</button>
+                    <button id="logoutButton" class="btn btn-light">Salir</button>
+                </div>
+            </div>
         </div>
     </header>
-    <main class="container">
-        <div id="cartList" class="cart-list"></div>
-        <div id="cartDetails" class="cart-details" style="display: none;">
-            <h2>Detalles del pedido</h2>
-            <div id="cartItems"></div>
-            <div id="cartTotal" class="total"></div>
-            <button id="updateCartButton">Actualizar carrito</button>
-            <button id="confirmOrderButton">Confirmar compra</button>
-            <button id="continueShopping">Seguir comprando</button>
+    <main class="container my-4">
+        <div id="cartList" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4"></div>
+        <div id="cartDetails" class="card" style="display: none;">
+            <div class="card-body">
+                <h2 class="card-title">Detalles del pedido</h2>
+                <div id="cartItems" class="mb-3"></div>
+                <div id="cartTotal" class="h4 mb-3"></div>
+                <div class="d-flex justify-content-between">
+                    <button id="updateCartButton" class="btn btn-primary">Actualizar carrito</button>
+                    <button id="confirmOrderButton" class="btn btn-success">Confirmar compra</button>
+                    <button id="continueShopping" class="btn btn-secondary">Seguir comprando</button>
+                </div>
+            </div>
         </div>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="cart.js"></script>
 </body>
 </html>

@@ -5,22 +5,20 @@ let cart = [];
 document.addEventListener('DOMContentLoaded', () => {
     const cartButton = document.getElementById('cartButton');
     const logoutButton = document.getElementById('logoutButton');
+    const sortSelect = document.getElementById('sortSelect');
 
-    // Verificar si el usuario está autenticado
     if (!localStorage.getItem('token')) {
         window.location.href = 'index.html';
         return;
     }
 
-    // Cargar productos y categorías
     fetchProducts();
     fetchCategories();
 
-    // Event listeners
     cartButton.addEventListener('click', () => window.location.href = 'cart.html');
     logoutButton.addEventListener('click', logout);
+    sortSelect.addEventListener('change', sortProducts);
 
-    // Cargar carrito desde localStorage
     cart = JSON.parse(localStorage.getItem('cart')) || [];
 });
 
@@ -46,9 +44,10 @@ async function fetchCategories() {
 
 function createCategoryButtons(categories) {
     const categoryButtons = document.getElementById('categoryButtons');
-    categoryButtons.innerHTML = '<button onclick="filterProducts(\'all\')">Todas</button>';
+    categoryButtons.innerHTML = '<button class="btn btn-outline-primary" onclick="filterProducts(\'all\')">Todas</button>';
     categories.forEach(category => {
         const button = document.createElement('button');
+        button.className = 'btn btn-outline-primary';
         button.textContent = category;
         button.onclick = () => filterProducts(category);
         categoryButtons.appendChild(button);
@@ -66,12 +65,19 @@ function displayProducts(productsToShow) {
 
 function createProductCard(product) {
     const card = document.createElement('div');
-    card.className = 'product-card';
+    card.className = 'col';
     card.innerHTML = `
-        <img src="${product.image}" alt="${product.title}">
-        <h3>${product.title}</h3>
-        <p>$${product.price.toFixed(2)}</p>
-        <button onclick="addToCart(${product.id})">Add</button>
+        <div class="card h-100 product-card">
+            <img src="${product.image}" class="card-img-top" alt="${product.title}">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">${product.title}</h5>
+                <p class="card-text flex-grow-1">${product.description.substring(0, 100)}...</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="h5 mb-0">$${product.price.toFixed(2)}</span>
+                    <button onclick="addToCart(${product.id})" class="btn btn-primary">Añadir</button>
+                </div>
+            </div>
+        </div>
     `;
     return card;
 }
@@ -81,6 +87,28 @@ function filterProducts(category) {
         ? products 
         : products.filter(product => product.category === category);
     displayProducts(filteredProducts);
+}
+
+function sortProducts() {
+    const sortBy = document.getElementById('sortSelect').value;
+    let sortedProducts = [...products];
+
+    switch (sortBy) {
+        case 'priceAsc':
+            sortedProducts.sort((a, b) => a.price - b.price);
+            break;
+        case 'priceDesc':
+            sortedProducts.sort((a, b) => b.price - a.price);
+            break;
+        case 'nameAsc':
+            sortedProducts.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+        case 'nameDesc':
+            sortedProducts.sort((a, b) => b.title.localeCompare(a.title));
+            break;
+    }
+
+    displayProducts(sortedProducts);
 }
 
 function addToCart(productId) {

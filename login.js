@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
-                window.location.href = 'main.html'; // Redirigir a la página principal
+                window.location.href = 'main.html';
             } else {
                 alert('Usuario o contraseña incorrectos');
             }

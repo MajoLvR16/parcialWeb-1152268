@@ -4,24 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tienda en línea - Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="header">
+    <header class="bg-dark text-white py-3">
         <div class="container">
-            <h1>Tienda en línea</h1>
-            <nav>
-                <button id="cartButton">Carrito</button>
-                <button id="logoutButton">Salir</button>
-            </nav>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">Tienda en línea</h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button id="cartButton" class="btn btn-outline-light me-2">Carrito</button>
+                    <button id="logoutButton" class="btn btn-light">Salir</button>
+                </div>
+            </div>
         </div>
     </header>
-    <main class="container">
-        <div class="filters">
-            <div id="categoryButtons"></div>
+    <main class="container my-4">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>Categorías</h2>
+                <div id="categoryButtons" class="d-flex flex-wrap gap-2"></div>
+            </div>
+            <div class="col-md-6">
+                <h2>Ordenar por</h2>
+                <select id="sortSelect" class="form-select">
+                    <option value="default">Por defecto</option>
+                    <option value="priceAsc">Precio: Menor a Mayor</option>
+                    <option value="priceDesc">Precio: Mayor a Menor</option>
+                    <option value="nameAsc">Nombre: A-Z</option>
+                    <option value="nameDesc">Nombre: Z-A</option>
+                </select>
+            </div>
         </div>
-        <div id="productGrid" class="product-grid"></div>
+        <div id="productGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4"></div>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
