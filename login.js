@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
+                
+                // Obtener el ID del usuario
+                const userResponse = await fetch('https://fakestoreapi.com/users');
+                const users = await userResponse.json();
+                const user = users.find(u => u.username === username);
+                if (user) {
+                    localStorage.setItem('userId', user.id);
+                }
+
                 window.location.href = 'main.html';
             } else {
                 alert('Usuario o contraseña incorrectos');

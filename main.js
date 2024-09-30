@@ -1,6 +1,5 @@
 let products = [];
 let categories = [];
-let cart = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const cartButton = document.getElementById('cartButton');
@@ -18,8 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cartButton.addEventListener('click', () => window.location.href = 'cart.html');
     logoutButton.addEventListener('click', logout);
     sortSelect.addEventListener('change', sortProducts);
-
-    cart = JSON.parse(localStorage.getItem('cart')) || [];
 });
 
 async function fetchProducts() {
@@ -111,21 +108,42 @@ function sortProducts() {
     displayProducts(sortedProducts);
 }
 
-function addToCart(productId) {
+async function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (product) {
-        const existingItem = cart.find(item => item.id === productId);
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({ ...product, quantity: 1 });
+        try {
+            const userId = localStorage.getItem('userId');
+            const response = await fetch('https://fakestoreapi.com/carts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    date: new Date(),
+                    products: [{productId: product.id, quantity: 1}]
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Nuevo carrito creado:', result);
+                alert('Producto añadido a un nuevo carrito');
+                
+                // Notificar que se ha creado un nuevo carrito
+                localStorage.setItem('cartUpdated', Date.now().toString());
+            } else {
+                throw new Error('Error al crear el carrito');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ocurrió un error al añadir el producto al carrito');
         }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        alert('Producto añadido al carrito');
     }
 }
 
 function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     window.location.href = 'index.html';
 }
